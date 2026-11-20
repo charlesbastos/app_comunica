@@ -12,16 +12,16 @@ O terceiro, quarto e quinto cards tem moldura azul, amarelo e verde respectivame
 
 5 - Incluir um botão abaixo da caixa de texto do item 4 para converter para áudio as palavras da caixa de textos do item 4.  Inicialmente o botão é desabilitado até que o texto do item 4 esteja disponível.
  
-6 - incluir na <div class="area-central"> duas caixas de seleção sendo:  
+6 - incluir na div class="area-central" duas caixas de seleção sendo:  
 Caixa (a) : 
-estado:    desativada
-Texto: 		 "Permitir digitar texto" 
-Função:	Quando selecionada, deve permitir que o usuário digite texto que será 
-incluído ao final da frase do item 4.
+	estado:    	desativada
+	Texto: 		"Permitir digitar texto" 
+	Função:		Quando selecionada, deve permitir que o usuário digite texto que será 
+				incluído ao final da frase do item 4.
 Caixa (b) : 
-estado:     ativada
-Texto:  		"Falar frase automaticamente". 
+	estado:     ativada
+	Texto:  	"Falar frase automaticamente". 
 	Função: 	Quando selecionada a frase deve ser convertida automaticamente
-quando disponível.
+				quando disponível.
 
 7 - Incluir um botão para limpar os cards e iniciar o aplicativo.

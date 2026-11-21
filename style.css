@@ -1,0 +1,319 @@
+:root {
+    --bg-color: #f4f7f6;
+    --container-bg: #ffffff;
+    --border-color: #ddd;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-color);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* Containers Superior e Inferior */
+.container-imagens {
+    width: 100%;
+    height: 160px;
+    background-color: var(--container-bg);
+    border-bottom: 2px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    overflow-x: auto;
+    white-space: nowrap;
+    gap: 15px;
+    scrollbar-width: thin;
+    touch-action: pan-x;
+    -webkit-overflow-scrolling: touch;
+}
+
+#container-inferior {
+    border-bottom: none;
+    border-top: 2px solid var(--border-color);
+    margin-top: auto;
+}
+
+/* Wrapper da Miniatura + Nome */
+.miniatura-wrapper {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    flex-shrink: 0;
+}
+
+.miniatura {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+    cursor: grab;
+    border: 2px solid transparent;
+    transition: transform 0.2s, border-color 0.2s;
+    touch-action: none;
+    -webkit-touch-callout: none;
+    user-select: none;
+}
+
+.miniatura:active {
+    cursor: grabbing;
+}
+
+.miniatura:hover {
+    transform: scale(1.05);
+    border-color: #2196F3;
+}
+
+.miniatura-nome {
+    font-size: 12px;
+    font-weight: bold;
+    color: #555;
+    text-transform: capitalize;
+}
+
+/* Área Central */
+.area-central {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    gap: 25px;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* Grid de Cards */
+.cards-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    width: 100%;
+}
+
+.card-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.card {
+    width: 160px;
+    height: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    transition: background-color 0.2s;
+    overflow: hidden;
+}
+
+.card img {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.card-nome {
+    font-size: 14px;
+    font-weight: 600;
+    color: #444;
+    text-transform: capitalize;
+    height: 20px;
+}
+
+/* Molduras específicas */
+.moldura-branca { border: 5px solid #ffffff; box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
+.moldura-vermelha { border: 5px solid #ff4d4d; }
+.moldura-azul { border: 5px solid #2196F3; }
+.moldura-amarelo { border: 5px solid #ffeb3b; }
+.moldura-verde { border: 5px solid #4caf50; }
+
+.drag-over {
+    background-color: #e3f2fd;
+    opacity: 0.8;
+}
+
+/* Controles e Inputs */
+.controles-frase {
+    width: 100%;
+    max-width: 800px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.caixa-texto {
+    width: 100%;
+    font-size: 24px;
+    padding: 12px 20px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    text-align: center;
+    font-weight: bold;
+    background-color: #fff;
+    color: #333;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+    visibility: hidden; /* Controlado via JS e regras de negócio */
+}
+
+.caixa-texto:disabled {
+    background-color: #eaeaea;
+    cursor: not-allowed;
+}
+
+.container-controles-botoes {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    gap: 10px;
+}
+
+.botoes-grupo {
+    display: flex;
+    gap: 15px;
+    width: 100%;
+    justify-content: center;
+}
+
+button {
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+button:active {
+    transform: scale(0.98);
+}
+
+.btn-audio { background-color: #4caf50; color: white; flex: 1; }
+.btn-audio:hover:not(:disabled) { background-color: #43a047; }
+.btn-audio:disabled { background-color: #cccccc; color: #666666; cursor: not-allowed; box-shadow: none; }
+
+.btn-limpar { background-color: #f44336; color: white; flex: 1; }
+.btn-limpar:hover { background-color: #e53935; }
+
+.btn-limpar-card {
+    padding: 5px 10px;
+    font-size: 12px;
+    background-color: #757575;
+    color: white;
+    box-shadow: none;
+    border-radius: 4px;
+}
+.btn-limpar-card:hover:not(:disabled) { background-color: #616161; }
+.btn-limpar-card:disabled { background-color: #e0e0e0; color: #9e9e9e; cursor: not-allowed; }
+
+.selecoes-grupo {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-top: 5px;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 16px;
+    color: #555;
+    cursor: pointer;
+}
+
+.checkbox-label input:disabled + span {
+    color: #aaa;
+    cursor: not-allowed;
+}
+
+/* ==========================================
+   MELHORIAS RESPONSIVAS PARA CELULAR (9x16)
+   ========================================== */
+@media (max-width: 480px) and (orientation: portrait), (max-aspect-ratio: 10/16) {
+    .container-imagens {
+        height: 100px;
+        padding: 5px;
+        gap: 10px;
+    }
+    .miniatura {
+        width: 50px;
+        height: 50px;
+    }
+    .miniatura-nome {
+        font-size: 10px;
+    }
+
+    .card {
+        width: 80px; 
+        height: 80px;
+        border-width: 3px;
+        border-radius: 8px;
+    }
+    .card img {
+        width: 70px;
+        height: 70px;
+        border-radius: 4px;
+    }
+    .card-nome {
+        font-size: 11px;
+        height: 15px;
+    }
+    .btn-limpar-card {
+        padding: 2px 6px;
+        font-size: 10px;
+    }
+
+    .cards-grid {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 10px 5px;
+        justify-items: center;
+    }
+    .cards-grid .card-wrapper:nth-child(1) { grid-column: span 2; }
+    .cards-grid .card-wrapper:nth-child(2) { grid-column: span 2; }
+    .cards-grid .card-wrapper:nth-child(3) { grid-column: span 2; }
+    .cards-grid .card-wrapper:nth-child(4) { grid-column: 2 / span 2; }
+    .cards-grid .card-wrapper:nth-child(5) { grid-column: 4 / span 2; }
+
+    .area-central {
+        padding: 10px;
+        gap: 15px;
+    }
+    .caixa-texto {
+        font-size: 18px;
+        padding: 8px 12px;
+    }
+
+    button {
+        padding: 10px 12px;
+        font-size: 14px;
+    }
+    .botoes-grupo {
+        gap: 10px;
+    }
+    .checkbox-label {
+        font-size: 14px;
+    }
+}

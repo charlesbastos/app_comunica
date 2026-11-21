@@ -2,19 +2,15 @@
 const imagensAcao = ['quero.jpg','escolhe.jpg', 'sim.jpg', 'não.jpg']; 
 const imagensObjetos = ['almoçar.jpg', 'tomar café.jpg', 'biscoito piraque morango.jpg', 'batata frita palito.jpg', 'chocolate nestle.jpg', 'macarrão.jpg', 'pizza.jpg'];
 
-// Configuração das imagens
 
-// Estado global do item atualmente arrastado
 let itemArrastado = null;
 let textoDigitadoUsuario = "";
 
-// Elementos da Interface
 const containerSuperior = document.getElementById('container-superior');
 const containerInferior = document.getElementById('container-inferior');
 const caixaFrase = document.getElementById('caixa-frase');
 const btnAudio = document.getElementById('btn-audio');
 const btnLimpar = document.getElementById('btn-limpar');
-const chkDigitar = document.getElementById('chk-digitar');
 const chkAuto = document.getElementById('chk-auto');
 
 const cards = [
@@ -24,7 +20,6 @@ const cards = [
     { id: 5, element: document.getElementById('card-5'), nomeElement: document.getElementById('nome-card-5'), btnLimparCard: document.getElementById('btn-limpar-card-5'), file: null }
 ];
 
-// Inicialização segura da aplicação
 function init() {
     renderMiniaturas(imagensAcao, 'imagens/acao/', containerSuperior, 'acao');
     renderMiniaturas(imagensObjetos, 'imagens/objetos/', containerInferior, 'objetos');
@@ -36,7 +31,6 @@ function init() {
 function renderMiniaturas(lista, path, container, origem) {
     container.innerHTML = '';
     lista.forEach(arquivo => {
-        // Criar elemento wrapper estruturado para segurar imagem + texto embaixo
         const wrapper = document.createElement('div');
         wrapper.classList.add('miniatura-wrapper');
 
@@ -123,6 +117,9 @@ function configurarBotoesLimparCard() {
             cardObj.nomeElement.textContent = '';
             cardObj.file = null;
             cardObj.btnLimparCard.disabled = true;
+            if (cardObj.id === 2) {
+                textoDigitadoUsuario = "";
+            }
             atualizarFraseEControles();
         });
     });
@@ -132,7 +129,7 @@ function atualizarCard(cardObj, filename, src) {
     cardObj.element.innerHTML = `<img src="${src}" alt="${filename}">`;
     cardObj.nomeElement.textContent = filename;
     cardObj.file = filename;
-    cardObj.btnLimparCard.disabled = false; // Habilita o botão ao receber figura
+    cardObj.btnLimparCard.disabled = false;
 }
 
 function atualizarFraseEControles() {
@@ -141,45 +138,56 @@ function atualizarFraseEControles() {
     const c4 = cards.find(c => c.id === 4).file;
     const c5 = cards.find(c => c.id === 5).file;
 
-    // Atualiza dinamicamente o estado de cada botão individual
     cards.forEach(cardObj => {
         cardObj.btnLimparCard.disabled = !cardObj.file;
     });
 
+    const card2Pronto = !!c2;
     const tresPrimeirosProntos = !!(c2 && c3);
 
-    if (tresPrimeirosProntos) {
-        let termos = ['gabriel', c2, c3];
-        if (c4) termos.push(c4);
-        if (c5) termos.push(c5);
+    let termosAtivos = ['gabriel'];
+    if (c2) termosAtivos.push(c2);
+    if (c3) termosAtivos.push(c3);
+    if (c4) termosAtivos.push(c4);
+    if (c5) termosAtivos.push(c5);
+    const fraseBase = termosAtivos.join(' ');
 
-        let fraseFinal = termos.join(' ');
-        
-        if (chkDigitar.checked && textoDigitadoUsuario) {
+    if (tresPrimeirosProntos) {
+        let fraseFinal = fraseBase;
+        if (textoDigitadoUsuario) {
             fraseFinal += ' ' + textoDigitadoUsuario;
         }
 
         caixaFrase.value = fraseFinal;
         caixaFrase.style.visibility = 'visible';
+        caixaFrase.disabled = false;
         
         btnAudio.disabled = false;
-        chkDigitar.disabled = false;
         chkAuto.disabled = false;
-
-        caixaFrase.disabled = !chkDigitar.checked;
 
         if (chkAuto.checked) {
             falarFrase(fraseFinal);
         }
+    } else if (card2Pronto) {
+        let fraseFinal = fraseBase;
+        if (textoDigitadoUsuario) {
+            fraseFinal += ' ' + textoDigitadoUsuario;
+        }
+        caixaFrase.value = fraseFinal;
+        caixaFrase.style.visibility = 'hidden';
+        caixaFrase.disabled = false;
+        
+        btnAudio.disabled = true;
+        chkAuto.disabled = true;
+        chkAuto.checked = false;
     } else {
         caixaFrase.value = '';
         caixaFrase.style.visibility = 'hidden';
         caixaFrase.disabled = true;
         btnAudio.disabled = true;
-        chkDigitar.disabled = true;
-        chkDigitar.checked = false;
-        //chkAuto.disabled = true;
-        //chkAuto.checked = false;
+        chkAuto.disabled = true;
+        chkAuto.checked = false;
+        textoDigitadoUsuario = "";
     }
 }
 
@@ -192,34 +200,27 @@ function falarFrase(texto) {
     }
 }
 
-chkDigitar.addEventListener('change', () => {
-    if (!chkDigitar.checked) {
-        textoDigitadoUsuario = "";
-    }
-    atualizarFraseEControles();
-});
-
 chkAuto.addEventListener('change', () => {
     atualizarFraseEControles();
 });
 
 caixaFrase.addEventListener('input', () => {
-    if (chkDigitar.checked) {
-        const c2 = cards.find(c => c.id === 2).file;
-        const c3 = cards.find(c => c.id === 3).file;
-        const c4 = cards.find(c => c.id === 4).file;
-        const c5 = cards.find(c => c.id === 5).file;
+    const c2 = cards.find(c => c.id === 2).file;
+    const c3 = cards.find(c => c.id === 3).file;
+    const c4 = cards.find(c => c.id === 4).file;
+    const c5 = cards.find(c => c.id === 5).file;
 
-        let termosBase = ['gabriel', c2, c3];
-        if (c4) termosBase.push(c4);
-        if (c5) termosBase.push(c5);
-        const fraseBase = termosBase.join(' ');
+    let termosBase = ['gabriel'];
+    if (c2) termosBase.push(c2);
+    if (c3) termosBase.push(c3);
+    if (c4) termosBase.push(c4);
+    if (c5) termosBase.push(c5);
+    const fraseBase = termosBase.join(' ');
 
-        if (caixaFrase.value.startsWith(fraseBase)) {
-            textoDigitadoUsuario = caixaFrase.value.substring(fraseBase.length).trim();
-        } else {
-            caixaFrase.value = fraseBase + (textoDigitadoUsuario ? ' ' + textoDigitadoUsuario : '');
-        }
+    if (caixaFrase.value.startsWith(fraseBase)) {
+        textoDigitadoUsuario = caixaFrase.value.substring(fraseBase.length).trim();
+    } else {
+        caixaFrase.value = fraseBase + (textoDigitadoUsuario ? ' ' + textoDigitadoUsuario : '');
     }
 });
 

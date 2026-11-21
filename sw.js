@@ -2,6 +2,7 @@ const CACHE_NAME = 'comunica-app-v1';
 const ASSETS = [
   './',
   './index.html',
+  './style.css',
   './app.js',
   './drag-drop-touch.js', // <-- Adicione esta linha no seu array de arquivos do sw.js
   './manifest.json',

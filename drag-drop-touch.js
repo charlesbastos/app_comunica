@@ -1,111 +1,111 @@
 /**
- * DragDropTouch - Polyfill para habilitar suporte a Drag and Drop nativo em dispositivos móveis.
- * Traduz Touch Events em Drag Events automaticamente.
+ * DragDropTouch Mobile v2 (Corrigido para evitar travamento de tela)
+ * Traduz toques em eventos de Drag & Drop sem violar listeners passivos do navegador.
  */
 (function () {
-    // Detecta se o dispositivo suporta toque
     if (!('ontouchstart' in window)) return;
 
-    var DragDropTouch = (function () {
-        function DragDropTouch() {
-            this._lastClick = 0;
-            window.addEventListener('touchstart', this._touchstart.bind(this), { passive: false });
-            window.addEventListener('touchmove', this._touchmove.bind(this), { passive: false });
-            window.addEventListener('touchend', this._touchend.bind(this));
-            window.addEventListener('touchcancel', this._touchend.bind(this));
+    var itemArrastadoMobile = null;
+    var elementoEspelho = null;
+
+    window.addEventListener('touchstart', function (e) {
+        if (e.touches.length !== 1) return;
+
+        var target = e.target;
+        // Busca se o elemento ou algum pai dele é arrastável
+        while (target && !target.draggable) {
+            target = target.parentElement;
         }
 
-        DragDropTouch.prototype._touchstart = function (e) {
-            if (this._shouldHandle(e)) {
-                e.preventDefault(); // Previne rolagem da tela ao arrastar a imagem
-                var src = e.target;
-                while (src && !src.draggable) {
-                    src = src.parentElement;
-                }
-                if (src && src.draggable) {
-                    this._dragSource = src;
-                    this._ptDown = e.touches[0];
-                    this._lastTouch = e.touches[0];
-                    
-                    // Dispara o evento de DragStart simulado
-                    var evt = document.createEvent('CustomEvent');
-                    evt.initCustomEvent('dragstart', true, true, null);
-                    evt.dataTransfer = new DataTransferSimulated();
-                    this._dataTransfer = evt.dataTransfer;
-                    
-                    // Executa o listener original do app.js
-                    src.dispatchEvent(evt);
-                }
-            }
-        };
+        if (target && target.draggable) {
+            itemArrastadoMobile = target;
 
-        DragDropTouch.prototype._touchmove = function (e) {
-            if (this._dragSource && e.touches.length > 0) {
-                e.preventDefault();
-                var touch = e.touches[0];
-                this._lastTouch = touch;
-                
-                var target = document.elementFromPoint(touch.clientX, touch.clientY);
-                while (target && target.parentElement && !target.dispatchEvent) {
-                    target = target.parentElement;
-                }
+            // Cria um clone visual da imagem sob o dedo para dar feedback ao usuário
+            elementoEspelho = target.cloneNode(true);
+            elementoEspelho.style.position = 'fixed';
+            elementoEspelho.style.pointerEvents = 'none';
+            elementoEspelho.style.opacity = '0.7';
+            elementoEspelho.style.zIndex = '9999';
+            elementoEspelho.style.width = target.offsetWidth + 'px';
+            elementoEspelho.style.height = target.offsetHeight + 'px';
+            document.body.appendChild(elementoEspelho);
 
-                if (target) {
-                    var evt = document.createEvent('CustomEvent');
-                    evt.initCustomEvent('dragover', true, true, null);
-                    evt.dataTransfer = this._dataTransfer;
-                    target.dispatchEvent(evt);
-                }
-            }
-        };
+            moverEspelho(e.touches[0]);
 
-        DragDropTouch.prototype._touchend = function (e) {
-            if (this._dragSource) {
-                var touch = this._lastTouch;
-                var target = document.elementFromPoint(touch.clientX, touch.clientY);
-                while (target && target.parentElement && !target.dispatchEvent) {
-                    target = target.parentElement;
-                }
-
-                if (target) {
-                    var evt = document.createEvent('CustomEvent');
-                    evt.initCustomEvent('drop', true, true, null);
-                    evt.dataTransfer = this._dataTransfer;
-                    target.dispatchEvent(evt);
-                }
-
-                var evtEnd = document.createEvent('CustomEvent');
-                evtEnd.initCustomEvent('dragend', true, true, null);
-                this._dragSource.dispatchEvent(evtEnd);
-
-                this._dragSource = null;
-            }
-        };
-
-        DragDropTouch.prototype._shouldHandle = function (e) {
-            return e.touches && e.touches.length === 1;
-        };
-
-        return DragDropTouch;
-    }());
-
-    // Classe simulada simplificada para carregar o estado do dataTransfer
-    var DataTransferSimulated = (function () {
-        function DataTransferSimulated() {
-            this._data = {};
-            this.dropEffect = 'move';
-            this.effectAllowed = 'all';
-            this.types = [];
+            // Dispara o evento dragstart que o seu app.js espera
+            var evtStart = document.createEvent('Event');
+            evtStart.initEvent('dragstart', true, true);
+            target.dispatchEvent(evtStart);
         }
-        DataTransferSimulated.prototype.setData = function (format, val) {
-            this._data[format] = val;
-        };
-        DataTransferSimulated.prototype.getData = function (format) {
-            return this._data[format] || '';
-        };
-        return DataTransferSimulated;
-    }());
+    }, { passive: true });
 
-    // Inicializa o tradutor de toques automaticamente
-    new DragDropTouch();
-}());
+    window.addEventListener('touchmove', function (e) {
+        if (!itemArrastadoMobile || e.touches.length !== 1) return;
+
+        var touch = e.touches[0];
+        moverEspelho(touch);
+
+        // Encontra qual elemento está embaixo do dedo no momento
+        var elementoSobODedo = document.elementFromPoint(touch.clientX, touch.clientY);
+        if (!elementoSobODedo) return;
+
+        // Procura se o elemento de baixo é um dos seus cards receptores
+        var cardTarget = elementoSobODedo;
+        while (cardTarget && !cardTarget.classList.contains('card')) {
+            cardTarget = cardTarget.parentElement;
+        }
+
+        if (cardTarget) {
+            // Dispara o dragover esperado pelo app.js para aplicar estilos/regras
+            var evtOver = document.createEvent('Event');
+            evtOver.initEvent('dragover', true, true);
+            evtOver.preventDefault = function() {}; // Simula o preventDefault exigido no dragover
+            cardTarget.dispatchEvent(evtOver);
+        }
+    }, { passive: true });
+
+    window.addEventListener('touchend', function (e) {
+        if (!itemArrastadoMobile) return;
+
+        // Remove o clone visual da tela
+        if (elementoEspelho && elementoEspelho.parentNode) {
+            elementoEspelho.parentNode.removeChild(elementoEspelho);
+        }
+
+        var touch = e.changedTouches[0];
+        var elementoSobODedo = document.elementFromPoint(touch.clientX, touch.clientY);
+        
+        if (elementoSobODedo) {
+            var cardTarget = elementoSobODedo;
+            while (cardTarget && !cardTarget.classList.contains('card')) {
+                cardTarget = cardTarget.parentElement;
+            }
+
+            if (cardTarget) {
+                // Remove a classe de destaque visual ao soltar
+                cardTarget.classList.remove('drag-over');
+
+                // Dispara o evento de drop esperado pela lógica do seu app.js
+                var evtDrop = document.createEvent('Event');
+                evtDrop.initEvent('drop', true, true);
+                cardTarget.dispatchEvent(evtDrop);
+            }
+        }
+
+        // Dispara o término do arrasto
+        var evtEnd = document.createEvent('Event');
+        evtEnd.initEvent('dragend', true, true);
+        itemArrastadoMobile.dispatchEvent(evtEnd);
+
+        // Limpa o estado global
+        itemArrastadoMobile = null;
+        elementoEspelho = null;
+    });
+
+    function moverEspelho(touch) {
+        if (!elementoEspelho) return;
+        // Centraliza a imagem clonada exatamente na ponta do dedo do usuário
+        elementoEspelho.style.left = (touch.clientX - (elementoEspelho.offsetWidth / 2)) + 'px';
+        elementoEspelho.style.top = (touch.clientY - (elementoEspelho.offsetHeight / 2)) + 'px';
+    }
+})();

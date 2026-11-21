@@ -1,12 +1,24 @@
 /**
- * DragDropTouch Mobile v3 (Focado em CSS touch-action)
- * Traduz toques em eventos de Drag & Drop confiando nas diretivas de touch-action do CSS.
+ * DragDropTouch Mobile v4 (Correção de Menu de Contexto e Sobreposição)
+ * Remove menus de contexto e clones órfãos ao arrastar em dispositivos móveis.
  */
 (function () {
     if (!('ontouchstart' in window)) return;
 
     var itemArrastadoMobile = null;
     var elementoEspelho = null;
+
+    // Previne que o menu de contexto do sistema apareça nas miniaturas arrastáveis
+    window.addEventListener('contextmenu', function (e) {
+        var target = e.target;
+        while (target && target !== document.body) {
+            if (target.draggable || target.classList.contains('miniatura')) {
+                e.preventDefault();
+                return false;
+            }
+            target = target.parentElement;
+        }
+    }, true);
 
     window.addEventListener('touchstart', function (e) {
         if (e.touches.length !== 1) return;
@@ -19,8 +31,12 @@
         if (target && target.draggable) {
             itemArrastadoMobile = target;
 
-            // Cria uma cópia visual leve para feedback do arrasto
+            // Remove qualquer espelho anterior órfão que possa ter ficado preso por segurança
+            limparEspelhosOrfaos();
+
+            // Cria o clone sob o dedo de forma limpa
             elementoEspelho = target.cloneNode(true);
+            elementoEspelho.classList.add('mobile-drag-mirror'); // Classe para identificação fácil
             elementoEspelho.style.position = 'fixed';
             elementoEspelho.style.pointerEvents = 'none';
             elementoEspelho.style.opacity = '0.6';
@@ -66,10 +82,6 @@
     window.addEventListener('touchend', function (e) {
         if (!itemArrastadoMobile) return;
 
-        if (elementoEspelho && elementoEspelho.parentNode) {
-            elementoEspelho.parentNode.removeChild(elementoEspelho);
-        }
-
         var touch = e.changedTouches[0];
         var elementoSobODedo = document.elementFromPoint(touch.clientX, touch.clientY);
         
@@ -92,7 +104,21 @@
         evtEnd.initEvent('dragend', true, true);
         itemArrastadoMobile.dispatchEvent(evtEnd);
 
+        // Remove o clone visual imediatamente ao soltar o dedo
+        limparEspelhosOrfaos();
+
         itemArrastadoMobile = null;
         elementoEspelho = null;
     }, { passive: true });
+
+    function limparEspelhosOrfaos() {
+        if (elementoEspelho && elementoEspelho.parentNode) {
+            elementoEspelho.parentNode.removeChild(elementoEspelho);
+        }
+        // Varredura de segurança caso algum evento de toque tenha falhado e deixado clones soltos na tela
+        var orfaos = document.querySelectorAll('.mobile-drag-mirror');
+        orfaos.forEach(function (el) {
+            if (el.parentNode) el.parentNode.removeChild(el);
+        });
+    }
 })();

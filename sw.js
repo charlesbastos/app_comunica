@@ -3,6 +3,7 @@ const ASSETS = [
   './',
   './index.html',
   './app.js',
+  './drag-drop-touch.js', // <-- Adicione esta linha no seu array de arquivos do sw.js
   './manifest.json',
   './imagens/gabriel.jpg',
   './imagens/acao/quero.jpg',

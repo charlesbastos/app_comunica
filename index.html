@@ -309,7 +309,7 @@
                     <span>Permitir digitar texto</span>
                 </label>
                 <label class="checkbox-label">
-                    <input type="checkbox" id="chk-auto" disabled>
+                    <input type="checkbox" id="chk-auto">
                     <span>Falar frase automaticamente</span>
                 </label>
             </div>
@@ -326,18 +326,26 @@
     <!-- 2 - Container Inferior (Objetos) -->
     <div id="container-inferior" class="container-imagens"></div>
 
+
+    <!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+         Inclusão do Script para o aplicativo PWA no celular -->
+    <!-- Tradutor de eventos Touch para Drag nativo (Celular) -->
+    <script src="drag-drop-touch.js"></script>
+
+
     <!-- Inclusão do Script Separado -->
     <script src="app.js"></script>
 
+     <!-- Inclusão do Script para o aplicativo PWA no celular -->
     <script>
-        // Registra o Service Worker no celular
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-            navigator.serviceWorker.register('sw.js')
-                .then(reg => console.log('Service Worker registrado com sucesso!', reg))
-                .catch(err => console.log('Falha ao registrar o Service Worker:', err));
-            });
-        }
+    // Registra o Service Worker no celular
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+            .then(reg => console.log('Service Worker registrado com sucesso!', reg))
+            .catch(err => console.log('Falha ao registrar o Service Worker:', err));
+        });
+    }
     </script>
 
 </body>
